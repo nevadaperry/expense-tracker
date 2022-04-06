@@ -23,60 +23,78 @@
 	</style>
 </head>
 <body>
-	<!-- Bootstrap JS -->
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+	<!-- Bootstrap JS 
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>-->
 	<div class="container">
 		<div class="row">
 			<div class="et-menu d-md-block col-0 col-md-4 col-lg-3">
-<%
-	panes = {
-		"manage_accounts" => "Add/edit/remove accounts",
-		"preferences" => "Preferences",
-		"about" => "About Expense Tracker",
-	}
-	panes.each do |key, value|
-%>
-<%= key %>
-<br/>
-<%
-	end
-	params[:pane]
-%>
 				<div class="et-label"><br/>Menu</div>
 				<ul class="nav nav-pills flex-column">
+					<%
+					panes = {
+						"manage_accounts" => "Add/edit/remove accounts",
+						"preferences" => "Preferences",
+						"about" => "About Expense Tracker",
+					}
+					panes.each do |key, value|
+					%>
 					<li class="nav-item">
-						<a class="nav-link" href="#">Add/edit/remove accounts</a>
+						<a class="nav-link
+						<%=
+						if key == params[:pane]
+							"active"
+						end
+						%>
+						" href="?pane=<%= key %>">
+							<span style="display: table-cell; white-space: nowrap">
+								<%= value %>
+							</span>
+							<span style="display: table-cell; width: 100%; text-align: right">
+								<%=
+								if key == params[:pane]
+									"▶"
+								end
+								%>
+							</span>
+						</a>
 					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#">Preferences</a>
-					</li>
-					<li class="nav-item">
-						<!-- link_to "About Expense Tracker", {:action => :et_about}, :class => "nav-link" -->
-						<a class="nav-link" href="about">About Expense Tracker</a>
-					</li>
+					<% end %>
 				</ul>
 				<div class="et-label"><br/>Accounts</div>
 				<ul class="nav nav-pills flex-column">
+					<%
+					accounts = {
+						"1" => "SouthState checking",
+						"2" => "PenFed credit card",
+						"3" => "Provider Name Roth IRA",
+						"4" => "Employer name 401k",
+					}
+					accounts.each do |key, value|
+					%>
 					<li class="nav-item">
-						<a class="nav-link" href="#">SouthState checking</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link active" href="#">
-							<span style="display: table-cell; white-space: nowrap">SouthState credit card</span>
-							<span style="display: table-cell; width: 100%; text-align: right">▶</span>
+						<a class="nav-link
+						<%=
+						if key == params[:account]
+							"active"
+						end
+						%>
+						" href="?pane=account_contents&account=<%= key %>">
+							<span style="display: table-cell; white-space: nowrap">
+								<%= value %>
+							</span>
+							<span style="display: table-cell; width: 100%; text-align: right">
+								<%=
+								if key == params[:account]
+									"▶"
+								end
+								%>
+							</span>
 						</a>
 					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#">PenFed credit card</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#">Provider name Roth IRA</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#">Employer name 401k</a>
-					</li>
+					<% end %>
 				</ul>
 			</div>
+			<% if params[:pane] == "account_contents" %>
 			<div class="et-content col-12 col-md-8 col-lg-9">
 				<div class="et-label" style="margin-left: -10px;"><br/>Selected account contents</div>
 				<div class="row et-info-bar">
@@ -135,6 +153,7 @@
 					<div class="et-info-item col-2 et-center"><%= '303.40' %></div>
 				</div>
 			</div>
+			<% end %>
 		</div>
 	</div>
 </body>
