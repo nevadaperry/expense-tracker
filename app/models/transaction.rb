@@ -1,4 +1,3 @@
 class Transaction < ApplicationRecord
-	attr_accessor :ident, :desc, :unixTime, :amountCents
-
+	attr_accessor :id, :desc, :unix_time, :amount_cents
 end

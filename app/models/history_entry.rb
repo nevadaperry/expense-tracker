@@ -1,3 +1,3 @@
 class HistoryEntry < ApplicationRecord
-	attr_accessor :ident, :unixTime, :className, :method, :args
+	attr_accessor :id, :unix_time, :class_name, :method, :args
 end

@@ -9,17 +9,20 @@
 	<title>Expense Tracker</title>
 	<style>
 		html, body {font-size: 10pt; height: 100%;}
-		/*.et-menu {border-right: 2px solid grey;}*/
 		.et-label {font-weight: bold;}
-		/*.nav-item {background: white; border: 1px solid grey;}*/
 		.nav-link {color: rebeccapurple;}
 		.nav-link.active {background: rebeccapurple !important;}
 		.et-info-item {border: 1px solid grey; padding: 6px; border-radius: 4px;}
+		.et-draft {color: lightgrey}
 		.et-filter-item {padding: 6px;}
-		.form-select {width: auto; display: inline;}
+		.form-select {width: auto; display: inline; max-height: 30px !important;}
 		.et-right {text-align: right;}
 		.et-left {text-align: left;}
 		.et-center {text-align: center;}
+		.et-danger-item {}
+		.et-danger-link, .et-danger-link:hover {color: firebrick; text-decoration: none;}
+		.et-action-item {}
+		.et-action-link {color: rebeccapurple; text-decoration: none;}
 	</style>
 </head>
 <body>
@@ -63,28 +66,22 @@
 				<div class="et-label"><br/>Accounts</div>
 				<ul class="nav nav-pills flex-column">
 					<%
-					accounts = {
-						"1" => "SouthState checking",
-						"2" => "PenFed credit card",
-						"3" => "Provider Name Roth IRA",
-						"4" => "Employer name 401k",
-					}
-					accounts.each do |key, value|
+					FinancialAccount.all.each do |f_a|
 					%>
 					<li class="nav-item">
 						<a class="nav-link
 						<%=
-						if key == params[:account]
+						if f_a.id.to_s == params[:account]
 							"active"
 						end
 						%>
-						" href="?pane=account_contents&account=<%= key %>">
+						" href="?pane=account_contents&account=<%= f_a.id %>">
 							<span style="display: table-cell; white-space: nowrap">
-								<%= value %>
+								<%= f_a.name %>
 							</span>
 							<span style="display: table-cell; width: 100%; text-align: right">
 								<%=
-								if key == params[:account]
+								if f_a.id.to_s == params[:account]
 									"▶"
 								end
 								%>
@@ -94,14 +91,36 @@
 					<% end %>
 				</ul>
 			</div>
-			<% if params[:pane] == "account_contents" %>
 			<div class="et-content col-12 col-md-8 col-lg-9">
+			<% if params[:pane] == "manage_accounts" %>
+				<div class="et-label" style="margin-left: -10px;"><br/>Accounts list</div>
+				<div class="row">
+					<% FinancialAccount.all.each do |f_a| %>
+					<div class="et-info-item col-5 d-flex align-items-center"><%= f_a.name %></div>
+					<div class="et-info-item col-3 d-flex align-items-center">
+						<span>Type:&nbsp;<span>
+						<select class="form-select" data-size="3">
+							<option>Asset</option>
+							<option>Expense</option>
+						</select>
+					</div>
+					<div class="et-info-item col-1 et-danger-item d-flex align-items-center">
+						<a class="et-danger-link" href="?pane=manage_accounts&delete_account=need_to_post_instead">Delete</a>
+					</div>
+					<div class="et-info-item col-3" style="visibility: hidden;"></div>
+					<% end %>
+				</div>
+			<%
+			elsif params[:pane] == "account_contents"
+				f_a = FinancialAccount.find_by_id(params[:account])
+				if f_a != nil
+			%>
 				<div class="et-label" style="margin-left: -10px;"><br/>Selected account contents</div>
-				<div class="row et-info-bar">
-					<div class="et-info-item col-4">SouthState credit card</div>
-					<div class="et-info-item col-2">Type: Expense</div>
-					<div class="et-info-item col-3 et-label">Balance: 383.31</div>
-					<div class="et-info-item col-3">Transaction count: 160</div>
+				<div class="row">
+					<div class="et-info-item col-4"><%= f_a.name %></div>
+					<div class="et-info-item col-2">Type: <%= f_a.et_type %></div>
+					<div class="et-info-item col-3 et-label">Balance: <%= f_a.cached_balance %></div>
+					<div class="et-info-item col-3">Transaction count: <%= "160" %></div>
 				</div>
 				<div class="row et-filter-bar">
 					<div class="et-filter-item col-6">
@@ -140,20 +159,33 @@
 						</select>
 					</div>
 				</div>
-				<div class="row et-table-header">
+				<div class="row">
 					<div class="et-info-item col-3 et-label et-right">Date mm/dd/yyyy at<br/>hh:mm CDT</div>
 					<div class="et-info-item col-5 et-label et-left">Description</div>
-					<div class="et-info-item col-2 et-label et-center">Amount</div>
+					<div class="et-info-item col-1 et-label et-center">Amt.</div>
 					<div class="et-info-item col-2 et-label et-center">Resulting balance</div>
+					<div class="et-info-item col-1 et-label et-center"></div>
 				</div>
-				<div class="row et-table-row">
-					<div class="et-info-item col-3 et-right"><%= '12/02/2021 at 04:30' %></div>
-					<div class="et-info-item col-5 et-left"><%= 'Store name - water softener salt' %></div>
-					<div class="et-info-item col-2 et-center"><%= '5.90' %></div>
-					<div class="et-info-item col-2 et-center"><%= '303.40' %></div>
+				<div class="row">
+					<div class="et-info-item col-3 et-right"><%= "12/02/2021 at 04:30" %></div>
+					<div class="et-info-item col-5 et-left"><%= "Store name - water softener salt" %></div>
+					<div class="et-info-item col-1 et-center"><%= "5.90" %></div>
+					<div class="et-info-item col-2 et-center"><%= "303.40" %></div>
+					<div class="et-info-item col-1 et-center et-danger-item">
+						<a class="et-danger-link" href="?pane=account_contents&delete_transaction=need_to_post_instead">Delete</a>
+					</div>
 				</div>
+				<div class="row">
+					<div class="et-info-item col-3 et-right et-draft"><%= "03/06/2022 at 10:42" %></div>
+					<div class="et-info-item col-5 et-left et-draft"><%= "Enter new transaction" %></div>
+					<div class="et-info-item col-1 et-center et-draft"><%= "0.00" %></div>
+					<div class="et-info-item col-2 et-center et-draft"><%= "" %></div>
+					<div class="et-info-item col-1 et-center et-action-item">
+						<a class="et-action-link" href="?pane=account_contents&add_transaction=need_to_post_instead">&nbsp;&nbsp;&nbsp;Add&nbsp;&nbsp;&nbsp;</a>
+					</div>
+				</div>
+			<% end; end %>
 			</div>
-			<% end %>
 		</div>
 	</div>
 </body>
