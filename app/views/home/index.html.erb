@@ -13,178 +13,233 @@
 		.nav-link {color: rebeccapurple;}
 		.nav-link.active {background: rebeccapurple !important;}
 		.et-info-item {border: 1px solid grey; padding: 6px; border-radius: 4px;}
-		.et-draft {color: lightgrey}
+		.et-invisible {visibility: hidden;}
 		.et-filter-item {padding: 6px;}
-		.form-select {width: auto; display: inline; max-height: 30px !important;}
+		.form-select {width: auto; display: inline; max-height: 80px !important;}
 		.et-right {text-align: right;}
 		.et-left {text-align: left;}
 		.et-center {text-align: center;}
-		.et-danger-item {}
-		.et-danger-link, .et-danger-link:hover {color: firebrick; text-decoration: none;}
-		.et-action-item {}
-		.et-action-link {color: rebeccapurple; text-decoration: none;}
 	</style>
 </head>
 <body>
-	<!-- Bootstrap JS 
+	<!-- Bootstrap JS (not used)
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>-->
 	<div class="container">
 		<div class="row">
-			<div class="et-menu d-md-block col-0 col-md-4 col-lg-3">
-				<div class="et-label"><br/>Menu</div>
+			<div class="et-menu d-md-block col-12 col-lg-3">
+				<div class="et-label"><br>Menu</div>
 				<ul class="nav nav-pills flex-column">
-					<%
-					panes = {
+					<% panes = {
 						"manage_accounts" => "Add/edit/remove accounts",
 						"preferences" => "Preferences",
 						"about" => "About Expense Tracker",
 					}
-					panes.each do |key, value|
-					%>
-					<li class="nav-item">
-						<a class="nav-link
-						<%=
-						if key == params[:pane]
-							"active"
-						end
-						%>
-						" href="?pane=<%= key %>">
-							<span style="display: table-cell; white-space: nowrap">
-								<%= value %>
-							</span>
-							<span style="display: table-cell; width: 100%; text-align: right">
-								<%=
-								if key == params[:pane]
-									"▶"
-								end
-								%>
-							</span>
-						</a>
-					</li>
+					panes.each do |key, value| %>
+						<li class="nav-item">
+							<a class="nav-link
+							<%= if key == params[:pane]
+								"active"
+							end %>
+							" href="?pane=<%= key %>">
+								<span style="display: table-cell; white-space: nowrap">
+									<%= value %>
+								</span>
+								<span style="display: table-cell; width: 100%; text-align: right">
+									<%= if key == params[:pane]
+										"▶"
+									end %>
+								</span>
+							</a>
+						</li>
 					<% end %>
 				</ul>
-				<div class="et-label"><br/>Accounts</div>
+				<div class="et-label"><br>Accounts</div>
 				<ul class="nav nav-pills flex-column">
 					<%
 					FinancialAccount.all.each do |f_a|
 					%>
-					<li class="nav-item">
-						<a class="nav-link
-						<%=
-						if f_a.id.to_s == params[:account]
-							"active"
-						end
-						%>
-						" href="?pane=account_contents&account=<%= f_a.id %>">
-							<span style="display: table-cell; white-space: nowrap">
-								<%= f_a.name %>
-							</span>
-							<span style="display: table-cell; width: 100%; text-align: right">
-								<%=
-								if f_a.id.to_s == params[:account]
-									"▶"
-								end
-								%>
-							</span>
-						</a>
-					</li>
+						<li class="nav-item">
+							<a class="nav-link
+							<%= if f_a.id.to_s == params[:account]
+								"active"
+							end %>
+							" href="?pane=account_contents&account=<%= f_a.id %>">
+								<span style="display: table-cell; white-space: nowrap">
+									<%= f_a.name %>
+								</span>
+								<span style="display: table-cell; width: 100%; text-align: right">
+									<%= if f_a.id.to_s == params[:account]
+										"▶"
+									end %>
+								</span>
+							</a>
+						</li>
 					<% end %>
 				</ul>
 			</div>
-			<div class="et-content col-12 col-md-8 col-lg-9">
-			<% if params[:pane] == "manage_accounts" %>
-				<div class="et-label" style="margin-left: -10px;"><br/>Accounts list</div>
-				<div class="row">
-					<% FinancialAccount.all.each do |f_a| %>
-					<div class="et-info-item col-5 d-flex align-items-center"><%= f_a.name %></div>
-					<div class="et-info-item col-3 d-flex align-items-center">
-						<span>Type:&nbsp;<span>
-						<select class="form-select" data-size="3">
-							<option>Asset</option>
-							<option>Expense</option>
-						</select>
+			<div class="et-content col-12 col-lg-9">
+				<% if params[:pane] == "manage_accounts" %>
+					<div class="et-label" style="margin-left: -10px;"><br>Accounts list</div>
+						<% FinancialAccount.all.each do |f_a| %>
+							<form action="/f_a_update" method="post" id="f_a_update_<%= f_a.id %>">
+							</form>
+							<form action="/f_a_delete" method="post" id="f_a_delete_<%= f_a.id %>">
+							</form>
+							<div class="row">
+								<div class="et-info-item col-4 d-flex align-items-center">
+									<%= f_a.name %>
+								</div>
+								<div class="et-info-item col-3 d-flex align-items-center">
+									<span>Type:&nbsp;</span>
+									<select class="form-select" name="asset_or_expense" form="f_a_update_<%= f_a.id %>">
+										<option selected><%= f_a.asset_or_expense %></option>
+										<% if f_a.asset_or_expense != "Asset" %>
+											<option>Asset</option>
+										<% end
+										if f_a.asset_or_expense != "Expense" %>
+											<option>Expense</option>
+										<% end %>
+									</select>
+								</div>
+								<div class="et-info-item col-2 d-grid">
+									<% if params[:just_updated].to_i == f_a.id %>
+										<button class="btn btn-success" type="submit" form="f_a_update_<%= f_a.id %>">Updated!</button>
+									<% else %>
+										<button class="btn btn-secondary" type="submit" form="f_a_update_<%= f_a.id %>">Update</button>
+									<% end %>
+									<input type="hidden" name="f_a_id" value="<%= f_a.id %>" form="f_a_update_<%= f_a.id %>">
+								</div>
+								<div class="et-info-item col-2 d-grid">
+										<button class="btn btn-danger" type="submit" form="f_a_delete_<%= f_a.id %>">Delete</button>
+										<input type="hidden" name="f_a_id" value="<%= f_a.id %>" form="f_a_delete_<%= f_a.id %>">
+								</div>
+							<div>
+						<% end %>
+						<form action="/f_a_create" method="post">
+							<div class="row">
+								<div class="et-info-item col-4 d-flex align-items-center">
+									<input class="form-control et-left" name="name" placeholder="New account name">
+								</div>
+								<div class="et-info-item col-3 d-flex align-items-center">
+									<span>Type:&nbsp;</span>
+									<select class="form-select" name="asset_or_expense">
+										<option>Asset</option>
+										<option>Expense</option>
+									</select>
+								</div>
+								<div class="et-info-item col-2 d-grid">
+									<button class="btn btn-secondary" type="submit">Add</button>
+								</div>
+								<div class="et-info-item col-2 et-invisible">
+								</div>
+							</div>
+						</form>
 					</div>
-					<div class="et-info-item col-1 et-danger-item d-flex align-items-center">
-						<a class="et-danger-link" href="?pane=manage_accounts&delete_account=need_to_post_instead">Delete</a>
-					</div>
-					<div class="et-info-item col-3" style="visibility: hidden;"></div>
-					<% end %>
-				</div>
-			<%
-			elsif params[:pane] == "account_contents"
-				f_a = FinancialAccount.find_by_id(params[:account])
-				if f_a != nil
-			%>
-				<div class="et-label" style="margin-left: -10px;"><br/>Selected account contents</div>
-				<div class="row">
-					<div class="et-info-item col-4"><%= f_a.name %></div>
-					<div class="et-info-item col-2">Type: <%= f_a.et_type %></div>
-					<div class="et-info-item col-3 et-label">Balance: <%= f_a.cached_balance %></div>
-					<div class="et-info-item col-3">Transaction count: <%= "160" %></div>
-				</div>
-				<div class="row et-filter-bar">
-					<div class="et-filter-item col-6">
-						<select class="form-select">
-							<option selected>Month</option>
-							<option>Year</option>
-						</select>
-						<span>&nbsp;of&nbsp;</span>
-						<select class="form-select">
-							<option>Jan</option>
-							<option>Feb</option>
-							<option>Mar</option>
-							<option>Apr</option>
-							<option>May</option>
-							<option>Jun</option>
-							<option>Jul</option>
-							<option>Aug</option>
-							<option>Sep</option>
-							<option>Oct</option>
-							<option>Nov</option>
-							<option selected>Dec</option>
-						</select>
-						<select class="form-select">
-							<option selected>2021</option>
-							<option>2020</option>
-						</select>
-					</div>
-					<div class="et-filter-item col-6">
-						<span>From&nbsp;</span>
-						<select class="form-select">
-							<option selected>Calendar popup</option>
-						</select>
-						<span>&nbsp;to&nbsp;</span>
-						<select class="form-select">
-							<option selected>Calendar popup</option>
-						</select>
-					</div>
-				</div>
-				<div class="row">
-					<div class="et-info-item col-3 et-label et-right">Date mm/dd/yyyy at<br/>hh:mm CDT</div>
-					<div class="et-info-item col-5 et-label et-left">Description</div>
-					<div class="et-info-item col-1 et-label et-center">Amt.</div>
-					<div class="et-info-item col-2 et-label et-center">Resulting balance</div>
-					<div class="et-info-item col-1 et-label et-center"></div>
-				</div>
-				<div class="row">
-					<div class="et-info-item col-3 et-right"><%= "12/02/2021 at 04:30" %></div>
-					<div class="et-info-item col-5 et-left"><%= "Store name - water softener salt" %></div>
-					<div class="et-info-item col-1 et-center"><%= "5.90" %></div>
-					<div class="et-info-item col-2 et-center"><%= "303.40" %></div>
-					<div class="et-info-item col-1 et-center et-danger-item">
-						<a class="et-danger-link" href="?pane=account_contents&delete_transaction=need_to_post_instead">Delete</a>
-					</div>
-				</div>
-				<div class="row">
-					<div class="et-info-item col-3 et-right et-draft"><%= "03/06/2022 at 10:42" %></div>
-					<div class="et-info-item col-5 et-left et-draft"><%= "Enter new transaction" %></div>
-					<div class="et-info-item col-1 et-center et-draft"><%= "0.00" %></div>
-					<div class="et-info-item col-2 et-center et-draft"><%= "" %></div>
-					<div class="et-info-item col-1 et-center et-action-item">
-						<a class="et-action-link" href="?pane=account_contents&add_transaction=need_to_post_instead">&nbsp;&nbsp;&nbsp;Add&nbsp;&nbsp;&nbsp;</a>
-					</div>
-				</div>
-			<% end; end %>
+				<% elsif params[:pane] == "preferences" %>
+					<div><span>Prefs</span></div>
+				<% elsif params[:pane] == "about" %>
+					<div><span>About</span></div>
+				<% elsif params[:pane] == "account_contents"
+					f_a = FinancialAccount.find_by_id(params[:account])
+					if f_a != nil %>
+						<div class="et-label" style="margin-left: -10px;"><br>Selected account contents</div>
+						<div class="row">
+							<div class="et-info-item col-4"><%= f_a.name %></div>
+							<div class="et-info-item col-2">Type: <%= f_a.asset_or_expense %></div>
+							<div class="et-info-item col-3 et-label">
+								Balance:
+								<%= "%0.2f" % HomeController.get_balance(f_a.id) %>
+							</div>
+							<div class="et-info-item col-3">Transaction count: <%= "160" %></div>
+						</div>
+						<div class="row et-filter-bar">
+							<div class="et-filter-item col-6">
+								<select class="form-select">
+									<option selected>Month</option>
+									<option>Year</option>
+								</select>
+								<span>&nbsp;of&nbsp;</span>
+								<select class="form-select">
+									<option>Jan</option>
+									<option>Feb</option>
+									<option>Mar</option>
+									<option>Apr</option>
+									<option>May</option>
+									<option>Jun</option>
+									<option>Jul</option>
+									<option>Aug</option>
+									<option>Sep</option>
+									<option>Oct</option>
+									<option>Nov</option>
+									<option selected>Dec</option>
+								</select>
+								<select class="form-select">
+									<option selected>2021</option>
+									<option>2020</option>
+								</select>
+							</div>
+							<div class="et-filter-item col-6">
+								<span>From&nbsp;</span>
+								<select class="form-select">
+									<option selected>Calendar popup</option>
+								</select>
+								<span>&nbsp;to&nbsp;</span>
+								<select class="form-select">
+									<option selected>Calendar popup</option>
+								</select>
+							</div>
+						</div>
+						<div class="row">
+							<div class="et-info-item col-3 et-label et-center">Day mm/dd/yyyy at hh:mm</div>
+							<div class="et-info-item col-2 et-label et-center">Amount</div>
+							<div class="et-info-item col-3 et-label et-left">Description</div>
+							<div class="et-info-item col-2 et-label et-center">Resulting balance</div>
+							<div class="et-info-item col-2 et-label et-center et-invisible"></div>
+						</div>
+						<%
+						Transaction.where(account_in: f_a.id).each do |tx|
+						%>
+							<form action="/tx_delete" method="post">
+								<div class="row">
+									<div class="et-info-item col-3 et-center">
+										<%= Time.at(tx.unix_time).strftime("%m/%d/%Y %H:%M") %>
+									</div>
+									<div class="et-info-item col-2 et-center">
+										<%= "%0.2f" % (tx.amount_cents / 100.0) %>
+									</div>
+									<div class="et-info-item col-3 et-left"><%= tx.desc %></div>
+									<div class="et-info-item col-2 et-center">
+										<%= "%0.2f" % HomeController.get_resulting_balance(f_a.id, tx) %>
+									</div>
+									<div class="et-info-item col-2 et-center d-grid">
+										<button class="btn btn-danger" type="submit">Delete</button>
+									</div>
+									<input type="hidden" name="account_in" value="<%= params[:account] %>">
+									<input type="hidden" name="tx_id" value="<%= tx.id %>">
+								</div>
+							</form>
+						<% end %>
+						<form action="/tx_create" method="post">
+							<div class="row">
+								<div class="et-info-item col-5 col-md-3">
+									<input class="form-control et-center" name="date_string" value="<%=
+										Time.now.strftime("%m/%d/%Y %H:%M")
+									%>">
+								</div>
+								<div class="et-info-item col-2 col-md-2">
+									<input class="form-control et-center" name="amount" placeholder="0.00">
+								</div>
+								<div class="et-info-item col-10 col-md-5">
+									<input class="form-control et-left" name="desc" placeholder="Enter new transaction">
+								</div>
+								<div class="et-info-item col-2 col-md-2 et-center d-grid">
+									<button class="btn btn-secondary" type="submit">Add</button>
+								</div>
+								<input type="hidden" name="account_in" value="<%= params[:account] %>">
+							</div>
+						</form>
+					<% end
+				end %>
 			</div>
 		</div>
 	</div>
