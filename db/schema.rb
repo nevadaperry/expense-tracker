@@ -10,26 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_03_30_223802) do
+ActiveRecord::Schema[7.0].define(version: 2022_04_18_193838) do
   create_table "financial_accounts", force: :cascade do |t|
-    t.integer "ident"
-    t.string "desc"
-    t.integer "type"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "history_entries", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "portfolios", force: :cascade do |t|
+    t.string "name"
+    t.string "financial_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
   create_table "transactions", force: :cascade do |t|
+    t.integer "unix_time"
+    t.integer "amount_cents"
+    t.string "desc"
+    t.integer "account_in"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

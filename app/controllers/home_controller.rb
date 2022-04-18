@@ -5,6 +5,28 @@ class HomeController < ApplicationController
 	def self.get_balance(f_a_id)
 		return Transaction.where(account_in: f_a_id).sum(:amount_cents) / 100.0
 	end
+	
+	def self.get_net_balance
+		f_a_joins = FinancialAccount.joins("LEFT OUTER JOIN transactions ON
+								transactions.account_in = financial_accounts.id")
+		net_balance = f_a_joins.where(financial_type: "Cash")
+											.sum(:amount_cents) / 100.0
+		net_balance -= f_a_joins.where(financial_type: "Expense")
+											.sum(:amount_cents) / 100.0
+		net_balance += f_a_joins.where(financial_type: "Long-term")
+											.sum(:amount_cents) / 100.0
+		return net_balance
+	end
+	
+	def self.get_liquid_balance
+		f_a_joins = FinancialAccount.joins("LEFT OUTER JOIN transactions ON
+								transactions.account_in = financial_accounts.id")
+		net_balance = f_a_joins.where(financial_type: "Cash")
+											.sum(:amount_cents) / 100.0
+		net_balance -= f_a_joins.where(financial_type: "Expense")
+											.sum(:amount_cents) / 100.0
+		return net_balance
+	end
 
 	def self.get_resulting_balance(f_a_id, tx)
 		return Transaction.where(account_in: f_a_id,
@@ -14,13 +36,13 @@ class HomeController < ApplicationController
 	def f_a_create
 		name = params[:name].presence || "Default name"
 		FinancialAccount.create(name: name,
-								asset_or_expense: params[:asset_or_expense])
+								financial_type: params[:financial_type])
 		redirect_to "/?pane=manage_accounts"
 	end
 	
 	def f_a_update
 		FinancialAccount.find_by(id: params[:f_a_id]).update(
-							asset_or_expense: params[:asset_or_expense])
+			name: params[:name], financial_type: params[:financial_type])
 		redirect_to "/?pane=manage_accounts&just_updated=" + params[:f_a_id]
 	end
 	
@@ -32,7 +54,7 @@ class HomeController < ApplicationController
 	def tx_create
 		desc = params[:desc].presence || "Default description"
 		amount_cents = (params[:amount].to_f * 100).to_i
-		date_string = params[:date_string] #.presence || Time.now.strftime("%m/%d/%Y %H:%M")
+		date_string = params[:date_string]
 		unix_time = Time.strptime(date_string, "%m/%d/%Y %H:%M").to_i
 		Transaction.create(desc: desc,
 						amount_cents: amount_cents,

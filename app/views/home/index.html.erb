@@ -31,8 +31,8 @@
 				<ul class="nav nav-pills flex-column">
 					<% panes = {
 						"manage_accounts" => "Add/edit/remove accounts",
-						"preferences" => "Preferences",
-						"about" => "About Expense Tracker",
+						#"preferences" => "Preferences",
+						#"about" => "About Expense Tracker",
 					}
 					panes.each do |key, value| %>
 						<li class="nav-item">
@@ -55,9 +55,7 @@
 				</ul>
 				<div class="et-label"><br>Accounts</div>
 				<ul class="nav nav-pills flex-column">
-					<%
-					FinancialAccount.all.each do |f_a|
-					%>
+					<% FinancialAccount.all.each do |f_a| %>
 						<li class="nav-item">
 							<a class="nav-link
 							<%= if f_a.id.to_s == params[:account]
@@ -76,6 +74,14 @@
 						</li>
 					<% end %>
 				</ul>
+				<div class="et-label">
+					<br>Net balance:
+					<%= "%0.2f" % HomeController.get_net_balance %>
+				</div>
+				<div class="et-label">
+					Liquid balance:
+					<%= "%0.2f" % HomeController.get_liquid_balance %>
+				</div>
 			</div>
 			<div class="et-content col-12 col-lg-9">
 				<% if params[:pane] == "manage_accounts" %>
@@ -87,17 +93,20 @@
 							</form>
 							<div class="row">
 								<div class="et-info-item col-4 d-flex align-items-center">
-									<%= f_a.name %>
+									<input class="form-control et-left" name="name" value="<%= f_a.name %>" form="f_a_update_<%= f_a.id %>">
 								</div>
 								<div class="et-info-item col-3 d-flex align-items-center">
 									<span>Type:&nbsp;</span>
-									<select class="form-select" name="asset_or_expense" form="f_a_update_<%= f_a.id %>">
-										<option selected><%= f_a.asset_or_expense %></option>
-										<% if f_a.asset_or_expense != "Asset" %>
-											<option>Asset</option>
+									<select class="form-select" name="financial_type" form="f_a_update_<%= f_a.id %>">
+										<option selected><%= f_a.financial_type %></option>
+										<% if f_a.financial_type != "Cash" %>
+											<option>Cash</option>
 										<% end
-										if f_a.asset_or_expense != "Expense" %>
+										if f_a.financial_type != "Expense" %>
 											<option>Expense</option>
+										<% end
+										if f_a.financial_type != "Long-term" %>
+											<option>Long-term</option>
 										<% end %>
 									</select>
 								</div>
@@ -122,9 +131,10 @@
 								</div>
 								<div class="et-info-item col-3 d-flex align-items-center">
 									<span>Type:&nbsp;</span>
-									<select class="form-select" name="asset_or_expense">
-										<option>Asset</option>
+									<select class="form-select" name="financial_type">
+										<option>Cash</option>
 										<option>Expense</option>
+										<option>Long-term</option>
 									</select>
 								</div>
 								<div class="et-info-item col-2 d-grid">
@@ -140,45 +150,59 @@
 				<% elsif params[:pane] == "about" %>
 					<div><span>About</span></div>
 				<% elsif params[:pane] == "account_contents"
-					f_a = FinancialAccount.find_by_id(params[:account])
+					f_a = FinancialAccount.find_by(id: params[:account])
 					if f_a != nil %>
 						<div class="et-label" style="margin-left: -10px;"><br>Selected account contents</div>
 						<div class="row">
 							<div class="et-info-item col-4"><%= f_a.name %></div>
-							<div class="et-info-item col-2">Type: <%= f_a.asset_or_expense %></div>
+							<div class="et-info-item col-3">Type: <%= f_a.financial_type %></div>
 							<div class="et-info-item col-3 et-label">
 								Balance:
 								<%= "%0.2f" % HomeController.get_balance(f_a.id) %>
 							</div>
-							<div class="et-info-item col-3">Transaction count: <%= "160" %></div>
 						</div>
+						<form method="get" id="filter_form">
+							<input type="hidden" name="pane" value="account_contents">
+							<input type="hidden" name="account" value="<%= f_a.id %>">
+						</form>
 						<div class="row et-filter-bar">
-							<div class="et-filter-item col-6">
-								<select class="form-select">
-									<option selected>Month</option>
-									<option>Year</option>
+							<div class="et-filter-item col-7">
+								<select class="form-select" name="filter_range" form="filter_form">
+									<% ranges = ["Month", "Year"]
+									selected_range = params[:filter_range].presence || "Year"
+									ranges.each do |range|
+										if range == selected_range %>
+											<option selected><%= range %></option>
+										<% else %>
+											<option><%= range %></option>
+										<% end
+									end %>
 								</select>
 								<span>&nbsp;of&nbsp;</span>
-								<select class="form-select">
-									<option>Jan</option>
-									<option>Feb</option>
-									<option>Mar</option>
-									<option>Apr</option>
-									<option>May</option>
-									<option>Jun</option>
-									<option>Jul</option>
-									<option>Aug</option>
-									<option>Sep</option>
-									<option>Oct</option>
-									<option>Nov</option>
-									<option selected>Dec</option>
+								<select class="form-select" name="filter_month" form="filter_form">
+									<% months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+									selected_month = params[:filter_month].presence || Time.now.strftime("%b")
+									months.each do |month|
+										if month == selected_month %>
+											<option selected><%= month %></option>
+										<% else %>
+											<option><%= month %></option>
+										<% end
+									end %>
 								</select>
-								<select class="form-select">
-									<option selected>2021</option>
-									<option>2020</option>
+								<select class="form-select" name="filter_year" form="filter_form">
+									<% years = ["2022", "2021"]
+									selected_year = params[:filter_year].presence || Time.now.strftime("%Y")
+									years.each do |year|
+										if year == selected_year %>
+											<option selected><%= year %></option>
+										<% else %>
+											<option><%= year %></option>
+										<% end
+									end %>
 								</select>
 							</div>
-							<div class="et-filter-item col-6">
+							<div class="et-filter-item col-6" style="display: none;">
 								<span>From&nbsp;</span>
 								<select class="form-select">
 									<option selected>Calendar popup</option>
@@ -188,17 +212,45 @@
 									<option selected>Calendar popup</option>
 								</select>
 							</div>
+							<div class="et-filter-item col-3 d-grid">
+								<button class="btn btn-secondary" type="submit" form="filter_form">
+									Update filter
+								</button>
+							</div>
+							<div class="et-filter-item col-2 et-invisible">
+							</div>
 						</div>
 						<div class="row">
-							<div class="et-info-item col-3 et-label et-center">Day mm/dd/yyyy at hh:mm</div>
+							<div class="et-info-item col-3 et-label et-center">Date in format<br>mm/dd/yyyy hh:mm</div>
 							<div class="et-info-item col-2 et-label et-center">Amount</div>
 							<div class="et-info-item col-3 et-label et-left">Description</div>
 							<div class="et-info-item col-2 et-label et-center">Resulting balance</div>
 							<div class="et-info-item col-2 et-label et-center et-invisible"></div>
 						</div>
-						<%
-						Transaction.where(account_in: f_a.id).each do |tx|
-						%>
+						<% if selected_range == "Month"
+							filtertext = selected_month + " 01 " + selected_year
+							filter_start = Time.strptime(filtertext, "%b %d %Y").to_i
+							# Find the end of the month as one second before
+							# the start of the next month
+							filtertext = (months.find_index(selected_month) + 2).to_s.rjust(1, "0")
+							filtertext += " 01 " + selected_year
+							filter_end = Time.strptime(filtertext, "%m %d %Y").to_i
+							filter_end -= 1
+						elsif selected_range == "Year"
+							filtertext = "01 01 " + selected_year
+							filter_start = Time.strptime(filtertext, "%m %d %Y").to_i
+							# Find the end of the year as one second before
+							# the start of the next year
+							filtertext = "01 01 " + (selected_year.to_i + 1).to_s
+							filter_end = Time.strptime(filtertext, "%m %d %Y").to_i
+							filter_end -= 1
+						else
+							filter_start = 1
+							filter_end = 9223372036854775807
+						end
+						Transaction.where(account_in: f_a.id,
+										unix_time: filter_start..filter_end)
+										.order(:unix_time).each do |tx| %>
 							<form action="/tx_delete" method="post">
 								<div class="row">
 									<div class="et-info-item col-3 et-center">
@@ -214,7 +266,7 @@
 									<div class="et-info-item col-2 et-center d-grid">
 										<button class="btn btn-danger" type="submit">Delete</button>
 									</div>
-									<input type="hidden" name="account_in" value="<%= params[:account] %>">
+									<input type="hidden" name="account_in" value="<%= f_a.id %>">
 									<input type="hidden" name="tx_id" value="<%= tx.id %>">
 								</div>
 							</form>
@@ -235,7 +287,7 @@
 								<div class="et-info-item col-2 col-md-2 et-center d-grid">
 									<button class="btn btn-secondary" type="submit">Add</button>
 								</div>
-								<input type="hidden" name="account_in" value="<%= params[:account] %>">
+								<input type="hidden" name="account_in" value="<%= f_a.id %>">
 							</div>
 						</form>
 					<% end
