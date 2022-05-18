@@ -12,8 +12,8 @@
 
 ## Screenshots
 
-![Screenshot of accounts list](https://github.com/nevadaperry/expense-tracker/raw/main/screenshot-accounts-list.png)
-![Screenshot of account 1](https://github.com/nevadaperry/expense-tracker/raw/main/screenshot-account-1.png)
+![Screenshot of accounts list](https://github.com/nevadaperry/rather-dapper-expense-tracker/raw/main/screenshots/screenshot-accounts-list.png)
+![Screenshot of account 1](https://github.com/nevadaperry/rather-dapper-expense-tracker/raw/main/screenshots/screenshot-account-1.png)
 
 ## Usage
 
@@ -27,7 +27,7 @@
 
 ## Additional screenshots
 
-![Screenshot of account 2](https://github.com/nevadaperry/expense-tracker/raw/main/screenshot-account-2.png)
-![Screenshot of account 3](https://github.com/nevadaperry/expense-tracker/raw/main/screenshot-account-3.png)
-![Screenshot of account 4](https://github.com/nevadaperry/expense-tracker/raw/main/screenshot-account-4.png)
-![Screenshot of account 5](https://github.com/nevadaperry/expense-tracker/raw/main/screenshot-account-5.png)
+![Screenshot of account 2](https://github.com/nevadaperry/rather-dapper-expense-tracker/raw/main/screenshots/screenshot-account-2.png)
+![Screenshot of account 3](https://github.com/nevadaperry/rather-dapper-expense-tracker/raw/main/screenshots/screenshot-account-3.png)
+![Screenshot of account 4](https://github.com/nevadaperry/rather-dapper-expense-tracker/raw/main/screenshots/screenshot-account-4.png)
+![Screenshot of account 5](https://github.com/nevadaperry/rather-dapper-expense-tracker/raw/main/screenshots/screenshot-account-5.png)
