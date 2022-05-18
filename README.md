@@ -17,7 +17,7 @@
 
 ## Usage
 
-* [Download](https://github.com/nevadaperry/expense-tracker/archive/refs/heads/main.zip) and extract this app to a convenient folder.
+* [Download](https://github.com/nevadaperry/rather-dapper-expense-tracker/archive/refs/heads/main.zip) and extract this app to a convenient folder.
 * Open a terminal and navigate to the expense-tracker folder.
 * Run `bin/rails s`
 * Open the page [localhost:3000](http://localhost:3000) in a web browser.
